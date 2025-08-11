@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 
+use App\Models\Node;
 use App\Models\Tree;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,32 +19,41 @@ use App\Http\Requests\Settings\ProfileUpdateRequest;
 
 class TreeController
 {
-    public function get(){
+    public function get()
+    {
         $tree = new Tree();
         $building = new Building(1, "building a", "2900");
         $buildingb = new Building(2, "building b", "3000");
         $tree->add($building);
         $tree->add($buildingb);
-    
+
         //this will fail due to contraints
         //$period = new TenancyPeriod(1, "period a", true);
         //$building->addChild($period);
-    
+
         $property = new Property(1, "property a", 1000);
-        $propertyb = new Property(2, "property b", 2000); 
-    
-        $building->addChild($property);
-        $building->addChild($propertyb);
-    
+        $propertyb = new Property(2, "property b", 2000);
+
+        $this->addNode($building, $property);
+        $this->addNode($building, $propertyb);
+
         dump($building->height());
-    
+
         //change the parent
-        $propertyb->changeParent($buildingb);
-    
+        $this->changeParent($propertyb, $buildingb);
+
         dump($building->children);
-    
+
         dd($buildingb->children);
     }
 
+    public function addNode(Node $node, Node $child)
+    {
+        $node->addChild($child);
+    }
 
+    public function changeParent(Node $node, Node $newParent)
+    {
+        $node->changeParent($newParent);
+    }
 }
