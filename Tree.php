@@ -12,45 +12,17 @@ class Tree
         return $this->root == null;
     }
 
-    // Clear out the BST.
     public function clear()
     {
         $this->root = null;
     }
 
-    public function add(Node $value)
+    public function add(Node $node)
     {
         if ($this->root == null) {
-            $this->root = new Corporation($value, null);
+            $this->root = new Corporation(1, "Corporation");
             return;
         }
-        $this->root->addChild($value, null);
-    }
-
-    // Convert the tree to a string.
-    public function __toString()
-    {
-        $res = "{ " . $this->toStringAux($this->root) . "}";
-        return $res;
-    }
-
-    // Helper method for the toString function.
-    private function toStringAux($treeNode)
-    {
-        $res = "";
-
-        if (!$treeNode) {
-            return "";
-        }
-
-        if ($treeNode->left != null) {
-            $res = $res . $this->toStringAux($treeNode->left);
-        }
-        $res .= (string) $treeNode->value . " ";
-        if ($treeNode->right != null) {
-            $res .= $this->toStringAux($treeNode->right);
-        }
-
-        return $res;
+        $this->root->addChild($node);
     }
 }

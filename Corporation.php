@@ -1,4 +1,3 @@
 <?php
 
-class Corporation extends Node{
-}
+class Corporation extends Node {}

@@ -1,8 +1,13 @@
 <?php
 
-class Tenant extends Node{
+class Tenant extends Node
+{
 
     public $movedInDate;
 
-    //Tenants can only have Tenancy Periods as parents.
+    public function __construct(int $id, string $name, $movedInDate)
+    {
+        parent::__construct($id, $name);
+        $this->movedInDate = $movedInDate;
+    }
 }

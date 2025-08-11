@@ -1,30 +1,41 @@
 <?php
 abstract class Node
 {
-    public $value;
-    public array $children; //array of nodes
+    public array $children = []; //array of nodes
     public $id;
     public $name;
     public $parent;
-    public $type; //Corporation, Building, Property, Tenancy Period, Tenant.
 
-    public function __construct($value, $child)
+    public function __construct(int $id, string $name)
     {
-        $this->value = $value;
-        $this->children[] = $child;
+        $this->id = $id;
+        $this->name = $name;
     }
 
-    public function height($node)
+    public function height()
     {
-        if ($node === null) {
+        if ($this === null) {
             return 0; //root
         }
 
-        $leftTreeHeight = $this->height($node->left);
-        $rightTreeHeight = $this->height($node->right);
+        $maxChildHeight = 0;
+        foreach ($this->children as $child) {
+            $childHeight = $child->height();
+            if ($childHeight > $maxChildHeight) {
+                $maxChildHeight = $childHeight;
+            }
+        }
+        return 1 + $maxChildHeight;
+    }
 
-
-        return max($leftTreeHeight, $rightTreeHeight) + 1;
+    public function changeParent(Node $newParent)
+    {
+        // Remove from current parent, if any
+        if ($this->parent !== null) {
+            $this->parent->removeChild($this);
+        }
+        // Set new parent
+        $newParent->addChild($this);
     }
 
     // Remove a child by node reference
@@ -42,24 +53,15 @@ abstract class Node
         return false;
     }
 
-    public function changeParent(Node $newParent)
-    {
-        // Remove from current parent, if any
-        if ($this->parent !== null) {
-            $this->parent->removeChild($this);
-        }
-        // Set new parent
-        $newParent->addChild($this, $newParent);
-    }
-
-    private function addChild($value, $treeNode)
+    public function addChild(Node $node)
     {
         //This is the place to setup conditions and validation
-        if($this->validate($value)){
-            $treeNode->children[] = $value;
-            $value->parent = $treeNode; //instead of $treenode it was $this...???
+        if ($this->validate($node)) {
+            $this->children[] = $node;
+            $node->parent = $this; //the referenced model is the parent 
+            return;
         }
-        return;
+        die;
     }
 
     /**
@@ -70,42 +72,49 @@ abstract class Node
      * Only one Tenancy Period can be active in a Property at a time.
      * A Tenancy Period can have a maximum of 4 tenants at any time.
      * 
+     * Usually you would implement a validation class that returns exceptions, but for simplicity I have left that out
      */
-    public function validate($value){
-        if(get_class($value) === Building::class){
-            return true; 
+    public function validate($value)
+    {
+        if (get_class($value) === Building::class && $this === null) {
+            //This is in order to skips the validations, since buildings does not have any requirements. 
+            //From the task, it did not mention that Buildings could be not dependent on Coorporations
+            return true;
         }
-        if(get_class($value) === Property::class && $value->parent !== Building::class){
-            //parent must be a building
-            return false; //Or just show error
-        }
-        if(get_class($value) === TenancyPeriod::class && $value->parent !== Property::class){
-            //parent must be a Property
 
-            if(count($value->parent->children) >= 4){
+        if (get_class($value) === Property::class && get_class($this) !== Building::class) {
+            echo "parent must be a building";
+            return false;
+        }
+        if (get_class($value) === TenancyPeriod::class && get_class($this) !== Property::class) {
+            echo "parent must be a Property";
+
+            return false;
+        }
+        if (get_class($value) === Tenant::class && get_class($this) !== TenancyPeriod::class) {
+            echo "parent must be a TenancyPeriod";
+
+            return false;
+        }
+        if (get_class($value) === TenancyPeriod::class && get_class($this) === Property::class) {
+            if (count($this->children) >= 4) {
+                echo "Max children must be 4";
+
                 return false; //because maximum 4 
             }
             //its siblings (tanancty periods) should not be active
-            foreach($value->parent->children as $sibling){
-                if(get_class($sibling) === TenancyPeriod::class && !$sibling->active){
+            foreach ($this->children as $sibling) {
+                if (get_class($sibling) === TenancyPeriod::class && !$sibling->active) {
                     return true;
-                }
-                else{
+                } else {
                     //reference broken, or tenancy period(s) are active
-                    return false; //because there is one tenancy period that is active
+                    echo "There is already an active tenancy period";
+
+                    return false;
                 }
             }
-
-            return false; 
-        }
-        if(get_class($value) === Tenant::class && $value->parent !== TenancyPeriod::class){
-            //parent must be a TenancyPeriod
-            return false; 
-        }
-        if(get_class($value) === Tenant::class && $value->parent !== TenancyPeriod::class){
-            //parent must be a Property
-            return false; 
         }
 
+        return true;
     }
 }
