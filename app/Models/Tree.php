@@ -1,7 +1,8 @@
 <?php
+namespace App\Models;
 
-require 'Node.php';
-require 'Corporation.php';
+use App\Models\Node;
+use App\Models\Corporation;
 
 class Tree
 {

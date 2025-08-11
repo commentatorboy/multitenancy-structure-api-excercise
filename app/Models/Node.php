@@ -1,4 +1,11 @@
 <?php
+namespace App\Models;
+
+use App\Models\Tenant;
+use App\Models\Building;
+use App\Models\Property;
+use App\Models\TenancyPeriod;
+
 abstract class Node
 {
     public array $children = []; //array of nodes
