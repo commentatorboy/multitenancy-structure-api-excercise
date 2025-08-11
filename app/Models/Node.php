@@ -5,6 +5,7 @@ use App\Models\Tenant;
 use App\Models\Building;
 use App\Models\Property;
 use App\Models\TenancyPeriod;
+use Exception;
 
 abstract class Node
 {
@@ -80,7 +81,6 @@ abstract class Node
      * Only one Tenancy Period can be active in a Property at a time.
      * A Tenancy Period can have a maximum of 4 tenants at any time.
      * 
-     * Usually you would implement a validation class that returns exceptions, but for simplicity I have left that out
      */
     public function validate($value)
     {
@@ -91,22 +91,22 @@ abstract class Node
         }
 
         if (get_class($value) === Property::class && get_class($this) !== Building::class) {
-            echo "parent must be a building";
+            throw new Exception("parent must be a building");
             return false;
         }
         if (get_class($value) === TenancyPeriod::class && get_class($this) !== Property::class) {
-            echo "parent must be a Property";
+            throw new Exception( "parent must be a Property");
 
             return false;
         }
         if (get_class($value) === Tenant::class && get_class($this) !== TenancyPeriod::class) {
-            echo "parent must be a TenancyPeriod";
+            throw new Exception( "parent must be a TenancyPeriod");
 
             return false;
         }
         if (get_class($value) === TenancyPeriod::class && get_class($this) === Property::class) {
             if (count($this->children) >= 4) {
-                echo "Max children must be 4";
+                throw new Exception( "Max children must be 4");
 
                 return false; //because maximum 4 
             }
@@ -116,7 +116,7 @@ abstract class Node
                     return true;
                 } else {
                     //reference broken, or tenancy period(s) are active
-                    echo "There is already an active tenancy period";
+                    throw new Exception( "There is already an active tenancy period");
 
                     return false;
                 }

@@ -26,8 +26,8 @@ class TreeController
         $tree->add($buildingb);
     
         //this will fail due to contraints
-        //$period = new TenancyPeriod(1, [], "period a");
-        //$tree->add($period);
+        //$period = new TenancyPeriod(1, "period a", true);
+        //$building->addChild($period);
     
         $property = new Property(1, "property a", 1000);
         $propertyb = new Property(2, "property b", 2000); 
@@ -35,12 +35,12 @@ class TreeController
         $building->addChild($property);
         $building->addChild($propertyb);
     
-        //var_dump($building->height());
+        dump($building->height());
     
         //change the parent
         $propertyb->changeParent($buildingb);
     
-        //var_dump($building->children);
+        dump($building->children);
     
         dd($buildingb->children);
     }
