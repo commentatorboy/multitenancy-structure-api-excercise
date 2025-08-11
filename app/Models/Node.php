@@ -59,7 +59,7 @@ abstract class Node
                 return true;
             }
         }
-        return false;
+        throw new Exception('Failed');
     }
 
     public function addChild(Node $node)
